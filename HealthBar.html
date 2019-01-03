@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>test1</title>
+
+<link rel="shortcut icon" href="css/favicon.ico">    
+<link rel="stylesheet" type="text/css" href="css/bssite.css" media="screen" />
+ 
+<script type="text/javascript" src="static/jquery-3.3.1.min.js" ></script>
+<script type="text/javascript" src="static/jquery-ui.1.12.1.min.js" ></script>
+<script type="text/javascript" src="static/pixi-4.8.2.min.js"></script>
+<script type="text/javascript" src="static/buzz-1.2.1.js"></script>
+<script type="text/javascript" src="static/brython-3.7.0.js"></script>
+<script type="text/javascript" src="static/brython_stdlib-3.7.0.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+window.onload=function(){
+brython({debug:1, pythonpath:['static']});
+}
+</script>
+<script type="text/python">
+from random import random, randint
+from ggame import (
+    App, 
+    Color, 
+    LineStyle, 
+    Sprite, 
+    RectangleAsset, 
+    ImageAsset, 
+    CircleAsset, 
+    EllipseAsset, 
+    PolygonAsset, 
+    Frame, 
+    MouseEvent, 
+    SoundAsset, 
+    Sound, 
+    TextAsset,
+)
+import math
+from time import time
+
+class Stars(Sprite):
+
+    asset = ImageAsset("images/sno.jpg")
+    width = 1199
+    height = 899
+
+    def __init__(self, position):
+        super().__init__(Stars.asset, position)
+
+class Ball(Sprite):
+    
+    asset = ImageAsset("images/attack.png", 
+        Frame(0,140,69.75,70), 4)
+    healthcount = 6
+        
+    def __init__(self, position, app):
+        super().__init__(Ball.asset, position)
+        app.listenKeyEvent('keydown', 'down arrow', self.ballDown)
+        app.listenKeyEvent('keydown', 'up arrow', self.ballUp)
+        app.listenKeyEvent('keydown', 'right arrow', self.ballright)
+        app.listenKeyEvent('keydown', 'left arrow', self.ballleft)
+        self .thrust = 0 
+        self .thrustframe =  1 
+        app.listenKeyEvent('keydown', 'space', self.thrustOn)
+        app.listenKeyEvent('keyup', 'space', self.thrustOff)
+        
+        
+    def ball_y_down(self):
+        self.y += self.direction
+
+    def ball_y_up(self):
+        self.y -= self.direction
+
+    def ball_x_right(self):
+        self.x += self.direction
+
+    def ball_x_left(self):
+        self.x -= self.direction
+
+        
+    def step(self):
+        if self.thrust == 1:
+            self.setImage(self.thrustframe)
+            self.thrustframe += 1
+            if self.thrustframe == 15 :
+                self.thrustframe = 1
+        else:
+            self.setImage(0)
+    
+    def ballDown(self, event):
+        self.ball_y_down()
+
+    def ballUp(self, event):
+        self.ball_y_up()
+
+    def ballleft(self, event):
+        self.ball_x_left()
+
+    def ballright(self, event):
+        self.ball_x_right()
+    
+    def  thrustOn(self, event):
+         self.thrust =  1
+        
+    def  thrustOff(self, event):
+         self.thrust =  0
+        
+
+class Sun(Sprite):
+    
+    asset = ImageAsset("images/sun.png")
+    
+    def __init__(self, position, app):
+        super().__init__(Sun.asset, position)
+        self.ball = app.ball
+        self.waitspawn = 0
+        
+    def step(self):
+       if self.ball.x <= self.x <= self.ball.x + self.ball.width and self.ball.y <= self.y <= self.ball.y + self.ball.height and self.ball.thrust :
+         self.visible = False
+         self.waitspawn = 2
+       elif self.visible == False:
+         self.ball.direction = 30
+
+       else:
+          self.ball.direction = 10
+
+          
+class Ba(Sprite):
+    
+    asset = ImageAsset("images/orb-150545_640.png")
+    
+    def __init__(self, position, app):
+        super().__init__(Ba.asset, position)
+        self.ball = app.ball
+        
+    def step(self):
+       if self.ball.x <= self.x <= self.ball.x + self.ball.width and self.ball.y <= self.y <= self.ball.y + self.ball.height and self.ball.thrust :
+         self.visible = False
+       elif self.visible == False:
+         self.ball.scale = 2.5
+       else:
+          self.ball.scale =1.5
+
+class Bunny(Sprite):
+
+    asset = ImageAsset("images/po.png")
+
+    def __init__(self, position, app):
+        super().__init__(Bunny.asset, position)
+        # register mouse events
+        app.listenMouseEvent(MouseEvent.mousedown, self.mousedown)
+        app.listenMouseEvent(MouseEvent.mouseup, self.mouseup)
+        app.listenMouseEvent(MouseEvent.mousemove, self.mousemove)
+        self.ball = app.ball
+        self.dragging = False
+
+    def step(self):
+        if self.ball.x <= self.x <= self.ball.x + self.ball.width and self.ball.y <= self.y <= self.ball.y + self.ball.height and self.ball.thrust and self.ball.visible == True :
+            self.visible = False
+        if random() < 0.04:
+            self.x += randint(-20,20)
+            self.y += randint(-20,20)
+
+    def mousedown(self, event):
+        # capture any mouse down within 50 pixels
+        self.deltax = event.x - (self.x + self.width//2) 
+        self.deltay = event.y - (self.y + self.height//2)
+        if abs(self.deltax) < 40 and abs(self.deltay) < 40:
+            self.dragging = True
+            # only drag one bunny at a time - consume the event
+            event.consumed = True
+
+    def mousemove(self, event):
+        if self.dragging:
+            self.x = event.x - self.deltax - self.width//2
+            self.y = event.y - self.deltay - self.height//2
+            event.consumed = True
+
+    def mouseup(self, event):
+        if self.dragging:
+            self.dragging = False
+            event.consumed = True
+            
+class DemoApp(App):
+        
+    def __init__(self):
+        super().__init__()
+        for x in range(self.width//Stars.width + 1):
+            for y in range(self.height//Stars.height + 1):
+                Stars((x*Stars.width, y*Stars.height))
+        self.ball = Ball((self.width/2, self.height/2), self)
+        self.sun = Sun((self.width/6, self.height/6), self)
+        self.ba = Ba((self.width/2+400, self.height/6), self)
+        self.bu = []
+        for i in range(20):
+            self.bu.append(Bunny((randint(50,self.width),randint(50,self.height)), self))
+
+    def step(self):
+        self.sun.scale = 0.5
+        self.sun.step()
+        self.ba.scale = 0.06
+        self.ba.step()
+        for bunny in self.bu:
+            bunny.step()
+            bunny.scale = 0.3
+        self.ball.step()
+
+
+
+# Create the app
+app = DemoApp()
+# Run the app
+app.run()
+</script>
+</body>
+</html>
+

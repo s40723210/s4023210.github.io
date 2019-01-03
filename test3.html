@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>test1</title>
+
+<link rel="shortcut icon" href="css/favicon.ico">    
+<link rel="stylesheet" type="text/css" href="css/bssite.css" media="screen" />
+ 
+<script type="text/javascript" src="static/jquery-3.3.1.min.js" ></script>
+<script type="text/javascript" src="static/jquery-ui.1.12.1.min.js" ></script>
+<script type="text/javascript" src="static/pixi-4.8.2.min.js"></script>
+<script type="text/javascript" src="static/buzz-1.2.1.js"></script>
+<script type="text/javascript" src="static/brython-3.7.0.js"></script>
+<script type="text/javascript" src="static/brython_stdlib-3.7.0.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+window.onload=function(){
+brython({debug:1, pythonpath:['static']});
+}
+</script>
+<script type="text/python">
+from ggame import App, RectangleAsset, ImageAsset, Sprite, LineStyle, Color, Frame
+
+class SpaceShip(Sprite):
+
+    asset = ImageAsset("images/four_spaceship_by_albertov_with_thrust.png", 
+        Frame(227,0,65,125), 4, 'vertical')
+
+    def __init__(self, position):
+        super().__init__(SpaceShip.asset, position)
+        self.thrust = 0
+        self.thrustframe = 1
+        SpaceGame.listenKeyEvent("keydown", "space", self.thrustOn)
+        SpaceGame.listenKeyEvent("keyup", "space", self.thrustOff)
+
+
+    def step(self):
+        if self.thrust == 1:
+            self.setImage(self.thrustframe)
+            self.thrustframe += 1
+            if self.thrustframe == 4:
+                self.thrustframe = 1
+        else:
+            self.setImage(0)
+
+    def thrustOn(self, event):
+        self.thrust = 1
+        
+    def thrustOff(self, event):
+        self.thrust = 0
+
+
+class SpaceGame(App):
+
+    def __init__(self):
+        super().__init__()
+        SpaceShip((600,300))
+
+    def step(self):
+        for ship in self.getSpritesbyClass(SpaceShip):
+            ship.step()
+
+        
+myapp = SpaceGame()
+myapp.run()
+
+</script>
+</body>
+</html>
+
