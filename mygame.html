@@ -147,7 +147,7 @@ class Ba(Sprite):
 
 class Bunny(Sprite):
 
-    asset = ImageAsset("images/poro.png")
+    asset = ImageAsset("images/cd.png")
 
     def __init__(self, position, app):
         super().__init__(Bunny.asset, position)
@@ -206,7 +206,7 @@ class DemoApp(App):
         self.ba.step()
         for bunny in self.bu:
             bunny.step()
-            bunny.scale = 0.3
+            bunny.scale = 0.15
         self.ball.step()
 
 
