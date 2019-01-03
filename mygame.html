@@ -161,7 +161,7 @@ class Bunny(Sprite):
     def step(self):
         if self.ball.x <= self.x <= self.ball.x + self.ball.width and self.ball.y <= self.y <= self.ball.y + self.ball.height and self.ball.thrust and self.ball.visible == True :
             self.visible = False
-        if random() < 0.025:
+        if random() < 0.03:
             self.x += randint(-30,30)
             self.y += randint(-20,20)
 
@@ -196,7 +196,7 @@ class DemoApp(App):
         self.sun = Sun((self.width/6, self.height/6), self)
         self.ba = Ba((self.width/2+400, self.height/6), self)
         self.bu = []
-        for i in range(15):
+        for i in range(20):
             self.bu.append(Bunny((randint(50,self.width),randint(50,self.height)), self))
 
     def step(self):
@@ -206,7 +206,7 @@ class DemoApp(App):
         self.ba.step()
         for bunny in self.bu:
             bunny.step()
-            bunny.scale = 0.25
+            bunny.scale = 0.3
         self.ball.step()
 
 
