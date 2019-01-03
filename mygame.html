@@ -147,7 +147,7 @@ class Ba(Sprite):
 
 class Bunny(Sprite):
 
-    asset = ImageAsset("images/po2.png")
+    asset = ImageAsset("images/poro.png")
 
     def __init__(self, position, app):
         super().__init__(Bunny.asset, position)
@@ -161,8 +161,8 @@ class Bunny(Sprite):
     def step(self):
         if self.ball.x <= self.x <= self.ball.x + self.ball.width and self.ball.y <= self.y <= self.ball.y + self.ball.height and self.ball.thrust and self.ball.visible == True :
             self.visible = False
-        if random() < 0.04:
-            self.x += randint(-20,20)
+        if random() < 0.025:
+            self.x += randint(-30,30)
             self.y += randint(-20,20)
 
     def mousedown(self, event):
@@ -196,7 +196,7 @@ class DemoApp(App):
         self.sun = Sun((self.width/6, self.height/6), self)
         self.ba = Ba((self.width/2+400, self.height/6), self)
         self.bu = []
-        for i in range(20):
+        for i in range(15):
             self.bu.append(Bunny((randint(50,self.width),randint(50,self.height)), self))
 
     def step(self):
